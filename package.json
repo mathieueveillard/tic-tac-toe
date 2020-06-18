@@ -1,0 +1,39 @@
+{
+  "name": "tic-tac-toe-js",
+  "version": "1.0.0",
+  "description": "Tic-Tac-Toe kata in TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --watch --config jest.config.json",
+    "format": "prettier --write 'src/**/*.ts'"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.1",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {},
+  "prettier": {
+    "printWidth": 120
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mathieueveillard/tic-tac-toe-js.git"
+  },
+  "keywords": [
+    "starter",
+    "project",
+    "kata",
+    "node",
+    "typescript",
+    "jest"
+  ],
+  "author": "Mathieu Eveillard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mathieueveillard/tic-tac-toe-js/issues"
+  },
+  "homepage": "https://github.com/mathieueveillard/tic-tac-toe-js#readme"
+}
