@@ -1,8 +1,0 @@
-{
-  "files.exclude": {
-    "**/*.js": true,
-    "**/*.spec.js": true,
-    "**/*.js.map": true
-  },
-  "editor.formatOnSave": true
-}

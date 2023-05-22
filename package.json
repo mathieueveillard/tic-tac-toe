@@ -1,20 +1,22 @@
 {
   "name": "tic-tac-toe",
   "version": "1.0.0",
-  "description": "Tic-Tac-Toe kata in TypeScript",
+  "description": "Starter project for kata (Node, TypeScript, Jest, fast-check, ts-node)",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watch --config jest.config.json",
-    "format": "prettier --write 'src/**/*.ts'"
+    "test": "jest --watch --coverage",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
-    "@types/jest": "^25.1.1",
-    "jest": "^24.9.0",
-    "prettier": "^1.19.1",
-    "ts-jest": "^25.2.0",
-    "typescript": "^3.7.5"
+    "@types/jest": "^29.5.1",
+    "fast-check": "^3.8.2",
+    "jest": "^29.5.0",
+    "jest-extended": "^3.2.4",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
   },
-  "dependencies": {},
   "prettier": {
     "printWidth": 120
   },
@@ -28,7 +30,10 @@
     "kata",
     "node",
     "typescript",
-    "jest"
+    "jest",
+    "fast-check",
+    "pbt",
+    "ts-node"
   ],
   "author": "Mathieu Eveillard",
   "license": "MIT",
