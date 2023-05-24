@@ -1,21 +1,24 @@
-import { EMPTY_BOARD, FinishedGame, Game, Move, OngoingGame, play } from ".";
+import {
+  EMPTY_BOARD,
+  WinningGame,
+  Game,
+  Move,
+  OngoingGame,
+  play,
+  DrawGame,
+  createOngoingGame,
+  createWinningGame,
+  createDrawGame,
+} from ".";
 
 const playMoves = (moves: Move[]): Game => {
-  const NOT_STARTED_GAME: OngoingGame = {
-    status: "ONGOING",
-    board: EMPTY_BOARD,
-    nextPlayer: "X",
-  };
-  return moves.reduce((game, move) => play(game)(move), NOT_STARTED_GAME);
+  const NOT_STARTED_GAME = createOngoingGame(EMPTY_BOARD, "X");
+  return moves.reduce((game, move) => play(move)(game), NOT_STARTED_GAME);
 };
 
 test("Allow a player to play on an empty cell", () => {
   // GIVEN
-  const game: OngoingGame = {
-    status: "ONGOING",
-    board: EMPTY_BOARD,
-    nextPlayer: "X",
-  };
+  const game = createOngoingGame(EMPTY_BOARD, "X");
   const move: Move = {
     player: "X",
     position: {
@@ -25,67 +28,18 @@ test("Allow a player to play on an empty cell", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
   const expected: Partial<OngoingGame> = {
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-  };
-  expect(actual.board).toEqual(expected.board);
-});
-
-test("[Triangulation] Allow a player to play on an empty cell", () => {
-  // GIVEN
-  const game: OngoingGame = {
-    status: "ONGOING",
-    board: EMPTY_BOARD,
-    nextPlayer: "X",
-  };
-  const move: Move = {
-    player: "X",
-    position: {
-      row: 0,
-      column: 1,
-    },
-  };
-
-  // WHEN
-  const actual = play(game)(move);
-
-  // THEN
-  const expected: Partial<OngoingGame> = {
-    board: [
-      { position: { row: 0, column: 0 }, content: "" },
-      { position: { row: 0, column: 1 }, content: "X" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
+    board: ["X", "", "", "", "", "", "", "", ""],
   };
   expect(actual.board).toEqual(expected.board);
 });
 
 test("Allow the other player to play on an empty cell", () => {
   // GIVEN
-  const game: OngoingGame = {
-    status: "ONGOING",
-    board: EMPTY_BOARD,
-    nextPlayer: "O",
-  };
+  const game = createOngoingGame(EMPTY_BOARD, "O");
   const move: Move = {
     player: "O",
     position: {
@@ -95,32 +49,18 @@ test("Allow the other player to play on an empty cell", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
   const expected: Partial<OngoingGame> = {
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
+    board: ["O", "", "", "", "", "", "", "", ""],
   };
   expect(actual.board).toEqual(expected.board);
 });
 
 test("Force players to play one after the other", () => {
   // GIVEN
-  const game: OngoingGame = {
-    status: "ONGOING",
-    board: EMPTY_BOARD,
-    nextPlayer: "X",
-  };
+  const game = createOngoingGame(EMPTY_BOARD, "X");
   const move: Move = {
     player: "X",
     position: {
@@ -130,24 +70,10 @@ test("Force players to play one after the other", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: OngoingGame = {
-    status: "ONGOING",
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    nextPlayer: "O",
-  };
+  const expected = createOngoingGame(["X", "", "", "", "", "", "", "", ""], "O");
   expect(actual).toEqual(expected);
 });
 
@@ -192,24 +118,10 @@ test("Detects that a player wins (3 'X' on the first row)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "X" },
-      { position: { row: 0, column: 2 }, content: "X" },
-      { position: { row: 1, column: 0 }, content: "O" },
-      { position: { row: 1, column: 1 }, content: "O" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["X", "X", "X", "O", "O", "", "", "", ""], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -254,24 +166,10 @@ test("Detects that a player wins (3 'X' on the second row)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "X" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "X" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["O", "O", "", "X", "X", "X", "", "", ""], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -316,24 +214,10 @@ test("Detects that a player wins (3 'X' on the third row)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "X" },
-      { position: { row: 2, column: 1 }, content: "X" },
-      { position: { row: 2, column: 2 }, content: "X" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["O", "O", "", "", "", "", "X", "X", "X"], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -378,24 +262,10 @@ test("Detects that a player wins (3 'X' on the first column)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "X" },
-      { position: { row: 1, column: 1 }, content: "O" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "X" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["X", "O", "", "X", "O", "", "X", "", ""], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -440,24 +310,10 @@ test("Detects that a player wins (3 'X' on the second column)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "X" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "O" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "X" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["O", "X", "", "O", "X", "", "", "X", ""], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -502,24 +358,10 @@ test("Detects that a player wins (3 'X' on the third column)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "" },
-      { position: { row: 0, column: 2 }, content: "X" },
-      { position: { row: 1, column: 0 }, content: "O" },
-      { position: { row: 1, column: 1 }, content: "" },
-      { position: { row: 1, column: 2 }, content: "X" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "X" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["O", "", "X", "O", "", "X", "", "", "X"], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -564,24 +406,10 @@ test("Detects that a player wins (3 'X' on the descending diagonal)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "" },
-      { position: { row: 1, column: 0 }, content: "O" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "X" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["X", "O", "", "O", "X", "", "", "", "X"], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -626,24 +454,10 @@ test("Detects that a player wins (3 'X' on the ascending diagonal)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "X" },
-      { position: { row: 1, column: 0 }, content: "O" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "X" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "X",
-  };
+  const expected = createWinningGame(["", "O", "X", "O", "X", "", "X", "", ""], "X");
   expect(actual).toEqual(expected);
 });
 
@@ -695,24 +509,10 @@ test("Detects that the other player wins (3 'O' on the first row)", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "O" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "O" },
-      { position: { row: 1, column: 0 }, content: "X" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "" },
-      { position: { row: 2, column: 0 }, content: "X" },
-      { position: { row: 2, column: 1 }, content: "" },
-      { position: { row: 2, column: 2 }, content: "" },
-    ],
-    winner: "O",
-  };
+  const expected = createWinningGame(["O", "O", "O", "X", "X", "", "X", "", ""], "O");
   expect(actual).toEqual(expected);
 });
 
@@ -785,23 +585,9 @@ test("Detects that no player wins", () => {
   };
 
   // WHEN
-  const actual = play(game)(move);
+  const actual = play(move)(game);
 
   // THEN
-  const expected: FinishedGame = {
-    status: "FINISHED",
-    board: [
-      { position: { row: 0, column: 0 }, content: "X" },
-      { position: { row: 0, column: 1 }, content: "O" },
-      { position: { row: 0, column: 2 }, content: "X" },
-      { position: { row: 1, column: 0 }, content: "X" },
-      { position: { row: 1, column: 1 }, content: "X" },
-      { position: { row: 1, column: 2 }, content: "O" },
-      { position: { row: 2, column: 0 }, content: "O" },
-      { position: { row: 2, column: 1 }, content: "X" },
-      { position: { row: 2, column: 2 }, content: "O" },
-    ],
-    winner: "None",
-  };
+  const expected = createDrawGame(["X", "O", "X", "X", "X", "O", "O", "X", "O"]);
   expect(actual).toEqual(expected);
 });

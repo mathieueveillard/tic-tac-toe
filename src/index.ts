@@ -5,40 +5,55 @@ type Player = "X" | "O";
 
 const GRID_SIZE = 3;
 
-type ValidIndex = 0 | 1 | 2;
+type Index = 0 | 1 | 2;
 
 type Position = Readonly<{
-  row: ValidIndex;
-  column: ValidIndex;
+  row: Index;
+  column: Index;
 }>;
 
-type CellContent = Player | "";
+type Cell = "" | Player;
 
-type Cell = Readonly<{
-  position: Position;
-  content: CellContent;
-}>;
+// [ 0, 1, 2,
+//   3, 4, 5,
+//   6, 7, 8]
+type Board = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell];
 
-type Board = Cell[];
-
-type AbstractGame = Readonly<{
-  status: string;
+type AbstractGame<Status extends string> = Readonly<{
+  status: Status;
   board: Board;
 }>;
 
-export type OngoingGame = AbstractGame &
+export type OngoingGame = AbstractGame<"ONGOING"> &
   Readonly<{
-    status: "ONGOING";
     nextPlayer: Player;
   }>;
 
-export type FinishedGame = AbstractGame &
+export type WinningGame = AbstractGame<"WINNING"> &
   Readonly<{
-    status: "FINISHED";
-    winner: Player | "None";
+    winner: Player;
   }>;
 
-export type Game = OngoingGame | FinishedGame;
+export type DrawGame = AbstractGame<"DRAW">;
+
+export type Game = OngoingGame | WinningGame | DrawGame;
+
+export const createOngoingGame = (board: Board, nextPlayer: Player): OngoingGame => ({
+  status: "ONGOING",
+  board,
+  nextPlayer,
+});
+
+export const createWinningGame = (board: Board, winner: Player): WinningGame => ({
+  status: "WINNING",
+  board,
+  winner,
+});
+
+export const createDrawGame = (board: Board): DrawGame => ({
+  status: "DRAW",
+  board,
+});
 
 export type Move = Readonly<{
   player: Player;
@@ -70,24 +85,15 @@ const DIRECTION_DIAGONAL_ASCENDING: Direction = {
   deltaColumn: 1,
 };
 
-export const EMPTY_BOARD: Board = [
-  { position: { row: 0, column: 0 }, content: "" },
-  { position: { row: 0, column: 1 }, content: "" },
-  { position: { row: 0, column: 2 }, content: "" },
-  { position: { row: 1, column: 0 }, content: "" },
-  { position: { row: 1, column: 1 }, content: "" },
-  { position: { row: 1, column: 2 }, content: "" },
-  { position: { row: 2, column: 0 }, content: "" },
-  { position: { row: 2, column: 1 }, content: "" },
-  { position: { row: 2, column: 2 }, content: "" },
-];
+export const EMPTY_BOARD: Board = ["", "", "", "", "", "", "", "", ""];
 
+// This function is **NOT** pure because it throws exceptions. Otherwise, it would be pure.
 export const play =
-  (game: Game) =>
-  (move: Move): Game => {
-    if (gameHasAlreadyFinished(game)) {
+  (move: Move) =>
+  (game: Game): Game => {
+    if (hasFinished(game)) {
       // Temporary solution: not the canonical way to handle user input errors
-      throw Error("Can't play: the game is finished.");
+      throw Error("Can't play: the game has already finished.");
     }
 
     if (wrongPlayer(game)(move)) {
@@ -98,54 +104,38 @@ export const play =
     const nextBoard = setCellContent(move)(game.board);
 
     if (playerWins(nextBoard)(move.player)) {
-      return {
-        status: "FINISHED",
-        board: nextBoard,
-        winner: move.player,
-      };
+      return createWinningGame(nextBoard, move.player);
     }
 
     if (boardIsFull(nextBoard)) {
-      return {
-        status: "FINISHED",
-        board: nextBoard,
-        winner: "None",
-      };
+      return createDrawGame(nextBoard);
     }
 
-    return {
-      status: "ONGOING",
-      board: nextBoard,
-      nextPlayer: otherPlayer(move.player),
-    };
+    return createOngoingGame(nextBoard, otherPlayer(move.player));
   };
+
+const computeBoardIndexFromPosition = ({ row, column }: Position): number => {
+  return row * GRID_SIZE + column;
+};
 
 const setCellContent =
   (move: Move) =>
   (board: Board): Board => {
-    return board.map((cell) => {
-      if (positionsMatch(move.position)(cell.position)) {
-        if (!isEmpty(cell)) {
-          // Temporary solution: not the canonical way to handle user input errors
-          throw Error("Can't play: the cell is not empty.");
-        }
-        return {
-          position: cell.position,
-          content: move.player,
-        };
-      }
-      return cell;
-    });
+    const nextBoard: Board = [...board];
+
+    const index = computeBoardIndexFromPosition(move.position);
+
+    if (!isEmpty(nextBoard[index])) {
+      // Temporary solution: not the canonical way to handle user input errors
+      throw Error("Can't play: the cell is not empty.");
+    }
+
+    nextBoard[index] = move.player;
+    return nextBoard;
   };
 
-const positionsMatch =
-  (positionToMatch: Position) =>
-  (position: Position): boolean => {
-    return positionToMatch.row === position.row && positionToMatch.column === position.column;
-  };
-
-const isEmpty = ({ content }: Cell): boolean => {
-  return content === "";
+const isEmpty = (cell: Cell): boolean => {
+  return cell === "";
 };
 
 const otherPlayer = (player: Player): Player => {
@@ -186,8 +176,8 @@ const shiftPosition =
   (from: Position) =>
   (direction: Direction) =>
   (times: number): Position => ({
-    row: (from.row + direction.deltaRow * times) as ValidIndex,
-    column: (from.column + direction.deltaColumn * times) as ValidIndex,
+    row: (from.row + direction.deltaRow * times) as Index,
+    column: (from.column + direction.deltaColumn * times) as Index,
   });
 
 const getCell =
@@ -198,14 +188,14 @@ const getCell =
 const matchesPlayer =
   (player: Player) =>
   (cell: Cell): boolean =>
-    cell.content === player;
+    cell === player;
 
 const boardIsFull = (board: Board): boolean => {
   return board.map(not(isEmpty)).reduce(and, true);
 };
 
-const gameHasAlreadyFinished = (game: Game): game is FinishedGame => {
-  return game.status === "FINISHED";
+const hasFinished = (game: Game): game is WinningGame | DrawGame => {
+  return game.status === "WINNING" || game.status === "DRAW";
 };
 
 const wrongPlayer = (game: OngoingGame) => (move: Move) => {
